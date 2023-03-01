@@ -21,10 +21,17 @@ def state_prep(angles):
 
 # Now we need to write functions for the measurement diagonalization circuits
 
+def clique_1_diag(circ,num_qubits):
+  with circ.context as (q,c):
+    for k in range(num_qubits):
+      gt.Measurement(q[k])
+  return(circ)
+
 def clique_2_diag(circ,num_qubits): # The post-prep circuit required to diagonalize the state for the measurement basis. Works with Clique 2 (see literature)
   with circ.context as (q,c):
     for k in range(num_qubits):
       gt.Hadamard(q[k]) # Clique 1 is all Xs so we just apply Hadamards to each qubit.
+      gt.Measurement(q[k])
   return(circ)
     
 def clique_3_diag(circ,num_qubits):
@@ -36,6 +43,8 @@ def clique_3_diag(circ,num_qubits):
         gt.Hadamard(q[k+1]) # Might be the other way around...
         gt.CNOT(q[k],q[k+1])
         gt.Hadamard(q[k])
+      for k in range(num_qubits):
+        gt.Measurement(q[k])
   return(circ)
 
 
@@ -45,10 +54,12 @@ def clique_4_diag(circ,num_qubits):
     print('Less than 3 qubits, so we do not need to measure clique 4.')
   else:
     with circ.context as (q,c):
-      for k in range(1,num_qubits,2):
+      for k in range(1,num_qubits-1,2):
         gt.Hadamard(q[k+1]) # Might be the other way around...
         gt.CNOT(q[k],q[k+1])
         gt.Hadamard(q[k])
+      for k in range(num_qubits):
+        gt.Measurement(q[k])
   return(circ)
 
 def all_my_circuits(angles):
@@ -57,6 +68,8 @@ def all_my_circuits(angles):
   # Uses a unary encoding
   M=len(angles)
   base1=state_prep(angles) # Makes the state prep circuit object which will have diagonalization circuits appended to it.
+  base1.unlock()
+  clique_1_diag(base1,M)
   base2=state_prep(angles) # Uh... if I didn't make separate ones it just changed them all each time. Problem? FIX
   base2.unlock()
   clique_2_diag(base2,M)
@@ -73,9 +86,15 @@ def all_my_circuits(angles):
       list_of_circuits.append(base4)
   return(list_of_circuits)
 
+def lmg_simulator(angles,num_shots):
+  M=len(angles)
+  list_of_circuits=all_my_circuits(angles)
 
 
 
+
+all_my_circuits([15,16,17,18,19])
+# Wait! This is a state-vector simulator in a weird way. How can I make it run, measure and repeat easily? Something seems odd.
     
 # Now we need to make a function which takes in a list of input angles and a number of shots
 # The function will then create all the necessary circuits and run them WITH MEASUREMENT
