@@ -21,81 +21,127 @@ def state_prep(angles):
 
 # Now we need to write functions for the measurement diagonalization circuits
 
-def clique_1_diag(circ,num_qubits):
-  with circ.context as (q,c):
-    for k in range(num_qubits):
-      gt.Measurement(q[k])
-  return(circ)
+def clique_1_diag(circ,num_shots):
+  with circ.context as reg:
+    meas1 = gt.Measurement(reg.q) | reg.c
+  simulate(circ)
+  samples = {}
+  for qubit in range(circ.num_qubits):
+      samples[qubit] = meas1.sample(qubit, num_shots)
+  pre_bitstrings=[samples[key] for key in samples.keys()]
+  bitstrings=list(map(list, zip(*pre_bitstrings)))
+  return(bitstrings)
 
-def clique_2_diag(circ,num_qubits): # The post-prep circuit required to diagonalize the state for the measurement basis. Works with Clique 2 (see literature)
+def clique_2_diag(circ,num_shots): # The post-prep circuit required to diagonalize the state for the measurement basis. Works with Clique 2 (see literature)
   with circ.context as (q,c):
-    for k in range(num_qubits):
+    for k in range(circ.num_qubits):
       gt.Hadamard(q[k]) # Clique 1 is all Xs so we just apply Hadamards to each qubit.
-      gt.Measurement(q[k])
-  return(circ)
+  circ.unlock()
+  with circ.context as reg:
+    meas2 = gt.Measurement(reg.q) | reg.c
+  simulate(circ)
+  samples = {}
+  for qubit in range(circ.num_qubits):
+      samples[qubit] = meas2.sample(qubit, num_shots)
+  pre_bitstrings=[samples[key] for key in samples.keys()]
+  bitstrings=list(map(list, zip(*pre_bitstrings)))
+  return(bitstrings)
     
-def clique_3_diag(circ,num_qubits):
-  if num_qubits<2:
+def clique_3_diag(circ,num_shots):
+  if circ.num_qubits<2:
     print('Less than 2 qubits, so we do not need to measure clique 3.')
   else:
     with circ.context as (q,c):
-      for k in range(0,num_qubits-1,2):
+      for k in range(0,circ.num_qubits-1,2):
         gt.Hadamard(q[k+1]) # Might be the other way around...
         gt.CNOT(q[k],q[k+1])
         gt.Hadamard(q[k])
-      for k in range(num_qubits):
-        gt.Measurement(q[k])
-  return(circ)
+    circ.unlock()
+    with circ.context as reg:
+      meas3 = gt.Measurement(reg.q) | reg.c
+    simulate(circ)
+    samples = {}
+    for qubit in range(circ.num_qubits):
+        samples[qubit] = meas3.sample(qubit, num_shots)
+    pre_bitstrings=[samples[key] for key in samples.keys()]
+    bitstrings=list(map(list, zip(*pre_bitstrings)))
+    return(bitstrings)
 
 
   
-def clique_4_diag(circ,num_qubits):
-  if num_qubits<3:
+def clique_4_diag(circ,num_shots):
+  if circ.num_qubits<3:
     print('Less than 3 qubits, so we do not need to measure clique 4.')
   else:
     with circ.context as (q,c):
-      for k in range(1,num_qubits-1,2):
+      for k in range(1,circ.num_qubits-1,2):
         gt.Hadamard(q[k+1]) # Might be the other way around...
         gt.CNOT(q[k],q[k+1])
         gt.Hadamard(q[k])
-      for k in range(num_qubits):
-        gt.Measurement(q[k])
-  return(circ)
+    circ.unlock()
+    with circ.context as reg:
+      meas3 = gt.Measurement(reg.q) | reg.c
+    simulate(circ)
+    samples = {}
+    for qubit in range(circ.num_qubits):
+        samples[qubit] = meas3.sample(qubit, num_shots)
+    pre_bitstrings=[samples[key] for key in samples.keys()]
+    bitstrings=list(map(list, zip(*pre_bitstrings)))
+    print(bitstrings)
+    return(bitstrings)
 
-def all_my_circuits(angles):
-  # Takes in a set of angles and returns a list of the (up to) 4 separate circuits...
-  # ... required to prepare and sample the LMG state efficiently
+# def all_my_circuits(angles,num_shots):
+#   # Takes in a set of angles and returns a list of the (up to) 4 separate circuits...
+#   # ... required to prepare and sample the LMG state efficiently
+#   # Uses a unary encoding
+#   M=len(angles)
+#   base1=state_prep(angles) # Makes the state prep circuit object which will have diagonalization circuits appended to it.
+#   base1.unlock()
+#   clique_1_diag(base1,M)
+#   base2=state_prep(angles) # Uh... if I didn't make separate ones it just changed them all each time. Problem? FIX
+#   base2.unlock()
+#   clique_2_diag(base2,M)
+#   list_of_circuits=[base1,base2]
+#   if M>1: # If M>1 then clique 3 will come into play
+#     base3=state_prep(angles)
+#     base3.unlock()
+#     clique_3_diag(base3,M)
+#     list_of_circuits.append(base3)
+#     if M>2: # If M>2 then clique 4 will come into play
+#       base4=state_prep(angles)
+#       base4.unlock()
+#       clique_4_diag(base4,M)
+#       list_of_circuits.append(base4)
+#   return(list_of_circuits)
+
+
+def all_my_circuits(angles,num_shots):
+  # Takes in a set of angles and num_shots
+  # Runs the necessary circuits (up to 4) with num_shots shots
+  # outputs lists of bitstrings collected in chronological order [[clique1 bitstrings],[clique2 bitsrings],...]
   # Uses a unary encoding
   M=len(angles)
   base1=state_prep(angles) # Makes the state prep circuit object which will have diagonalization circuits appended to it.
   base1.unlock()
-  clique_1_diag(base1,M)
+  bitstrings_1=clique_1_diag(base1,num_shots)
   base2=state_prep(angles) # Uh... if I didn't make separate ones it just changed them all each time. Problem? FIX
   base2.unlock()
-  clique_2_diag(base2,M)
-  list_of_circuits=[base1,base2]
+  bitstrings_2=clique_2_diag(base2,num_shots)
+  list_of_outputs=[bitstrings_1,bitstrings_2]
   if M>1: # If M>1 then clique 3 will come into play
     base3=state_prep(angles)
     base3.unlock()
-    clique_3_diag(base3,M)
-    list_of_circuits.append(base3)
+    bitstrings_3=clique_3_diag(base3,num_shots)
+    list_of_outputs.append(bitstrings_3)
     if M>2: # If M>2 then clique 4 will come into play
       base4=state_prep(angles)
       base4.unlock()
-      clique_4_diag(base4,M)
-      list_of_circuits.append(base4)
-  return(list_of_circuits)
-
-def lmg_simulator(angles,num_shots):
-  M=len(angles)
-  list_of_circuits=all_my_circuits(angles)
+      bitstrings_4=clique_4_diag(base4,num_shots)
+      list_of_outputs.append(bitstrings_4)
+  return(list_of_outputs)
 
 
 
-
-all_my_circuits([15,16,17,18,19])
-# Wait! This is a state-vector simulator in a weird way. How can I make it run, measure and repeat easily? Something seems odd.
-    
 # Now we need to make a function which takes in a list of input angles and a number of shots
 # The function will then create all the necessary circuits and run them WITH MEASUREMENT
 # It will return a list of bitstrings [[strings from clique 1], [strings from clique 2]...]
