@@ -90,30 +90,6 @@ def clique_4_diag(circ,num_shots):
     print(bitstrings)
     return(bitstrings)
 
-# def all_my_circuits(angles,num_shots):
-#   # Takes in a set of angles and returns a list of the (up to) 4 separate circuits...
-#   # ... required to prepare and sample the LMG state efficiently
-#   # Uses a unary encoding
-#   M=len(angles)
-#   base1=state_prep(angles) # Makes the state prep circuit object which will have diagonalization circuits appended to it.
-#   base1.unlock()
-#   clique_1_diag(base1,M)
-#   base2=state_prep(angles) # Uh... if I didn't make separate ones it just changed them all each time. Problem? FIX
-#   base2.unlock()
-#   clique_2_diag(base2,M)
-#   list_of_circuits=[base1,base2]
-#   if M>1: # If M>1 then clique 3 will come into play
-#     base3=state_prep(angles)
-#     base3.unlock()
-#     clique_3_diag(base3,M)
-#     list_of_circuits.append(base3)
-#     if M>2: # If M>2 then clique 4 will come into play
-#       base4=state_prep(angles)
-#       base4.unlock()
-#       clique_4_diag(base4,M)
-#       list_of_circuits.append(base4)
-#   return(list_of_circuits)
-
 
 def all_my_circuits(angles,num_shots):
   # Takes in a set of angles and num_shots
@@ -140,8 +116,3 @@ def all_my_circuits(angles,num_shots):
       list_of_outputs.append(bitstrings_4)
   return(list_of_outputs)
 
-
-
-# Now we need to make a function which takes in a list of input angles and a number of shots
-# The function will then create all the necessary circuits and run them WITH MEASUREMENT
-# It will return a list of bitstrings [[strings from clique 1], [strings from clique 2]...]
