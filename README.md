@@ -16,3 +16,7 @@ In VQE, we first prepare the ansatz state $\ket{\psi(\theta)}$ on a QPU, then we
 
 ### The LMG Model [FIX INSERT CITATIONS]
 The Lipkin-Meshkov-Glick (LMG) model was originally designed to model oxygen nuclei but is more known as a testbed for studying quantum phase transitions in general. It is an exactly-solvable dual-model bosonic Gaudin-Richardson model and can be solved with an eigenstate generating operator (EGO). 
+
+
+## What's left to do
+Once I debug the state-to-angle function, then I need to actually test it against simulations on Qiskit and with my previous data analyzing functions on Mathematica. Repeatedly. Will all configurations of nua and nub.
