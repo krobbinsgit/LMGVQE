@@ -19,4 +19,4 @@ The Lipkin-Meshkov-Glick (LMG) model was originally designed to model oxygen nuc
 
 
 ## What's left to do
-Once I debug the state-to-angle function, then I need to actually test it against simulations on Qiskit and with my previous data analyzing functions on Mathematica. Repeatedly. Will all configurations of nua and nub.
+It appears that the measurement system in '''dwave.gate''' has a quirk that Theodor is working out. It was giving bitstrings that weren't in the set of encoded physical states e.g. 1101. In effect, the measurements weren't respecting entanglement.
