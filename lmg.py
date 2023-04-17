@@ -152,10 +152,8 @@ def all_my_circuits(angles,num_shots,out_file_name):
   return(list_of_outputs)
 
 
-all_my_circuits([15,16,17,18],10,'test_dest')
+# all_my_circuits([15,16,17,18],10,'test_dest')
 
-# Wait! This is a state-vector simulator in a weird way. How can I make it run, measure and repeat easily? Something seems odd.
-    
 # Now we need to make a function which takes in a list of input angles and a number of shots
 # The function will then create all the necessary circuits and run them WITH MEASUREMENT
 # It will return a list of bitstrings [[strings from clique 1], [strings from clique 2]...]

@@ -5,12 +5,30 @@
 # I'd like to set it up so that it "waits" for inputs manually. I've never figured that shit out.
 import numpy as np
 from lmg import all_my_circuits
-from analyzer import distrfinder
+from analyzer import distrfinder, distrfinder2
 from state_generator import state_finder_fock, angle_finder
 # FIX FAILING PRETTY BADLY
+# Gives correct answer when fed sample data from research
+# On closer look, examining the measurement from clique 1 results in bad bitstrings
+# Something is wrong with entanglement in the measurement system!
+# I spoke with Theodor and I need to clone something or other to do it.
+
+
+# Begin by checking the 53-qubit data and associated analyzing functions
+targ_val,targ_state=state_finder_fock(53,np.sqrt(3),np.sqrt(2),0,0,0)
+distr=distrfinder2(np.sqrt(3),np.sqrt(2),0,0)
+sampling_uncertainty = np.std(distr)/np.sqrt(len(distr))
+mean=sum(distr)/len(distr)
+print(f'\nWe can check the 53-qubit data.\nFor the test, the target energy is {np.round(targ_val,5)} while we obtained a value of {np.round(mean,5)} +/- {np.round(sampling_uncertainty,5)}')
+if abs(mean)-sampling_uncertainty<=abs(targ_val)<=abs(mean)+sampling_uncertainty:
+    print('Success!\n')
+else:
+    print('Failure!\n')
+
+
 M=5
 V=3.2
-W=-1
+W=-1.5
 nua=0
 nub=0
 shots=10**4
@@ -25,3 +43,7 @@ if abs(mean)-sampling_uncertainty<=abs(targ_val)<=abs(mean)+sampling_uncertainty
     print('Success!')
 else:
     print('Failure!')
+
+
+
+
