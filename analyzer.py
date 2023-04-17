@@ -107,8 +107,8 @@ def distrfinder2(V,W,nua,nub): # Just changing the input to the 53 qubits data g
     return(h_distr)
 
 #print(distrfinder(3,1.2,0,0,'test_dest.txt'))
-distr=distrfinder2(np.sqrt(3),np.sqrt(2),0,0)
-print(sum(distr)/len(distr))
+#distr=distrfinder2(np.sqrt(3),np.sqrt(2),0,0)
+#print(sum(distr)/len(distr))
 
 # fo=open('53qublines2.txt','r')
 # bigstr=fo.readlines() # Here I'm opening the file and reading it.
