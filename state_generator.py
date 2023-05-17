@@ -42,11 +42,5 @@ def angle_finder(inp_state): # Given an eigenstate to prepare, it outputs the ne
     return(post) 
 
 
-# st=state_finder_fock(5,1.3,-0.5,0,0,0)
-# angs_out=angle_finder(st[1])
-# for ang in angs_out:
-#     print(np.round(ang,4))
-
-    
 
 

@@ -38,7 +38,7 @@ def clique_1_diag(circ,num_shots):
 def clique_2_diag(circ,num_shots): # The post-prep circuit required to diagonalize the state for the measurement basis. Works with Clique 2 (see literature)
   with circ.context as (q,c):
     for k in range(circ.num_qubits):
-      gt.Hadamard(q[k]) # Clique 1 is all Xs so we just apply Hadamards to each qubit.
+      gt.Hadamard(q[k]) # Clique 2 is all Xs so we just apply Hadamards to each qubit.
   circ.unlock()
   with circ.context as reg:
     meas2 = gt.Measurement(reg.q) | reg.c
@@ -53,7 +53,7 @@ def clique_2_diag(circ,num_shots): # The post-prep circuit required to diagonali
     
 def clique_3_diag(circ,num_shots):
   if circ.num_qubits<2:
-    print('Less than 2 qubits, so we do not need to measure clique 3.')
+    print('Less than 2 qubits, so we do not need to measure clique 3.\n')
   else:
     with circ.context as (q,c):
       for k in range(0,circ.num_qubits-1,2):
@@ -76,7 +76,7 @@ def clique_3_diag(circ,num_shots):
   
 def clique_4_diag(circ,num_shots):
   if circ.num_qubits<3:
-    print('Less than 3 qubits, so we do not need to measure clique 4.')
+    print('Less than 3 qubits, so we do not need to measure clique 4.\n')
   else:
     with circ.context as (q,c):
       for k in range(1,circ.num_qubits-1,2):
@@ -94,6 +94,8 @@ def clique_4_diag(circ,num_shots):
     bitstrings=list(map(list, zip(*pre_bitstrings))) # POSSIBLE FIX: IS IT TRANSPOSING CORRECTLY?
     bitstrings = [intcaststr(bitstring) for bitstring in bitstrings]
     return(bitstrings)
+  
+
 
 # def all_my_circuits(angles,num_shots):
 #   # Takes in a set of angles and returns a list of the (up to) 4 separate circuits...
@@ -120,6 +122,65 @@ def clique_4_diag(circ,num_shots):
 #   return(list_of_circuits)
 
 
+def nucl1(circ,num_shots): # A new version of diagonal circuit 1
+  # used for testing Theodor's new sample() function which should fix entanglement issue
+  with circ.context as reg:
+    meas1 = gt.Measurement(reg.q) | reg.c
+  dwave.gate.simulator.simulate(circ)
+  qubs=[qubit for qubit in range(circ.num_qubits)]
+  samples = meas1.sample(qubs, num_shots,as_bitstring=True)
+  return(samples)
+
+def nucl2(circ,num_shots): # The post-prep circuit required to diagonalize the state for the measurement basis. Works with Clique 2 (see literature)
+  with circ.context as (q,c):
+    for k in range(circ.num_qubits):
+      gt.Hadamard(q[k]) # Clique 2 is all Xs so we just apply Hadamards to each qubit.
+  circ.unlock()
+  with circ.context as reg:
+    meas2 = gt.Measurement(reg.q) | reg.c
+  dwave.gate.simulator.simulate(circ)
+  qubs=[qubit for qubit in range(circ.num_qubits)]
+  samples = meas2.sample(qubs, num_shots,as_bitstring=True)
+  return(samples)
+    
+def nucl3(circ,num_shots):
+  if circ.num_qubits<2:
+    print('Less than 2 qubits, so we do not need to measure clique 3.\n')
+  else:
+    with circ.context as (q,c):
+      for k in range(0,circ.num_qubits-1,2):
+        gt.Hadamard(q[k+1]) # Might be the other way around...
+        gt.CNOT(q[k],q[k+1])
+        gt.Hadamard(q[k])
+    circ.unlock()
+    with circ.context as reg:
+      meas3 = gt.Measurement(reg.q) | reg.c
+    dwave.gate.simulator.simulate(circ)
+    qubs=[qubit for qubit in range(circ.num_qubits)]
+    samples = meas3.sample(qubs, num_shots,as_bitstring=True)
+    return(samples)
+
+
+  
+def nucl4(circ,num_shots):
+  if circ.num_qubits<3:
+    print('Less than 3 qubits, so we do not need to measure clique 4.\n')
+  else:
+    with circ.context as (q,c):
+      for k in range(1,circ.num_qubits-1,2):
+        gt.Hadamard(q[k+1]) # Might be the other way around...
+        gt.CNOT(q[k],q[k+1])
+        gt.Hadamard(q[k])
+    circ.unlock()
+    with circ.context as reg:
+      meas4 = gt.Measurement(reg.q) | reg.c
+    dwave.gate.simulator.simulate(circ)
+    qubs=[qubit for qubit in range(circ.num_qubits)]
+    samples = meas4.sample(qubs, num_shots,as_bitstring=True)
+    return(samples)
+  
+
+
 def all_my_circuits(angles,num_shots,out_file_name):
   # Takes in a set of angles and num_shots
   # Runs the necessary circuits (up to 4) with num_shots shots
@@ -128,20 +189,20 @@ def all_my_circuits(angles,num_shots,out_file_name):
   M=len(angles)
   base1=state_prep(angles) # Makes the state prep circuit object which will have diagonalization circuits appended to it.
   base1.unlock()
-  bitstrings_1=clique_1_diag(base1,num_shots)
+  bitstrings_1=nucl1(base1,num_shots)
   base2=state_prep(angles) # Uh... if I didn't make separate ones it just changed them all each time. Problem? FIX
   base2.unlock()
-  bitstrings_2=clique_2_diag(base2,num_shots)
+  bitstrings_2=nucl2(base2,num_shots)
   list_of_outputs=[bitstrings_1,bitstrings_2]
   if M>1: # If M>1 then clique 3 will come into play
     base3=state_prep(angles)
     base3.unlock()
-    bitstrings_3=clique_3_diag(base3,num_shots)
+    bitstrings_3=nucl3(base3,num_shots)
     list_of_outputs.append(bitstrings_3)
     if M>2: # If M>2 then clique 4 will come into play
       base4=state_prep(angles)
       base4.unlock()
-      bitstrings_4=clique_4_diag(base4,num_shots)
+      bitstrings_4=nucl4(base4,num_shots)
       list_of_outputs.append(bitstrings_4)
   fo=open(str(out_file_name)+'.txt','w')
   for outs in list_of_outputs:
@@ -152,7 +213,11 @@ def all_my_circuits(angles,num_shots,out_file_name):
   return(list_of_outputs)
 
 
-# all_my_circuits([15,16,17,18],10,'test_dest')
+
+
+
+
+all_my_circuits([np.pi,np.pi,np.pi],10,'test_dest')
 
 # Now we need to make a function which takes in a list of input angles and a number of shots
 # The function will then create all the necessary circuits and run them WITH MEASUREMENT

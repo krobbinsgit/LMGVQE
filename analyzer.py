@@ -1,6 +1,7 @@
 # This is the file which will have the python code to interpret my results.
 # This will be based on the 53qubanalyzer.py file
 import numpy as np
+import random as ra
 
 
 def kd(i,j): # Kronecker Delta
@@ -13,20 +14,38 @@ def idenc(M,V,W,nua,nub): # The identity coefficient
     N=2*M+nua+nub
     return(W*M**3/(6*N)+M**2*(nub-nua+W*(1+nua+nub))/(4*N)+M*(21*(nub-nua)+W*(14+21*(nua+nub)+6*nua*nub))/(24*N)+3*(nub-nua+W*(nua+nub+2*nua*nub))/(8*N))
 
-def z1c(M,V,W,nua,nub):
+def z1c(M,V,W,nua,nub): # Seems to be correct?
     return((4*M**2+3*nua+5*nub+M*(8-6*W+4*W*nua+4*nub)+W*(8+5*nua-3*nub+2*nua*nub))/(16*M+8*(nua+nub)))
     
-def zMc(M,V,W,nua,nub):
+# def z1c2(M,V,W,nua,nub): # New version.
+#     N=2*M+nua+nub
+#     return((4*M**2+8*M+3*nua+nub*(4*M+5)+W*(8-6*M+nua*(4*M+5)-3*nub+2*nua*nub))/(8*N))
+
+def zMc(M,V,W,nua,nub): # Seems to be correct
     return((4*M**2+5*nua+3*nub+M*(8+6*W+4*nua-4*W*nub)-W*(8-3*nua+5*nub+2*nua*nub))/(16*M+8*(nua+nub)))
-def zjc(k,M,V,W,nua,nub):
+
+# def zMc2(M,V,W,nua,nub): # New version
+#     N=2*M+nua+nub
+#     return((4*M**2+8*M+nua*(5+4*M)+3*nub+W*(6*M-8+3*nua-nub*(5+4*M)-2*nua*nub))/(8*N))
+
+def zjc(k,M,V,W,nua,nub): # Seems to be correct?
     return((2*(-2*M*(W-1)+nua+nub+W*(4*k+nua-nub-2)))/(8*M+4*nua+4*nub))
 
-def zijc(k,M,V,W,nua,nub):
+# def zjc2(k,M,V,W,nua,nub):
+#     N=2*M+nua+nub
+#     return(1/2+W*(nua-nub-2*M-2+4*k)/(2*N))
+
+def zijc(k,M,V,W,nua,nub): # Seems to be correct?
     return((4*k-2*M-W+nua-nub-(2*W*(2*k+nua)*(2*M-2*k+nub))/(2*M+nua+nub))/8)
 
-def xjc(k,M,V,W,nua,nub):
+# def zijc2(k,M,V,W,nua,nub):
+#     N=2*M+nua+nub
+#     return((4*k+nua-nub-2*M)/8-W*(-8*k**2+4*k*(2*M-nua+nub)+nua*(4*M+1)+nub+2*nua*nub+2*M)/(8*N))
+
+def xjc(k,M,V,W,nua,nub): # Seems to be correct?
     return(V/(4*M+2*nua+2*nub)* (1+(kd(k,M)+kd(k,1))/2)/2*((nua+2*k)*(nua+2*k-1)*(2*M+nub-2*k+1)*(2*M+nub-2*k+2))**0.5)
     
+
 def xzjc(k,M,V,W,nua,nub): # This perfectly agrees with Mathematica
     return(V/4/(4*M+2*nua+2*nub)*((nua+2*k)*(nua+2*k-1)*(2*M+nub-2*k+1)*(2*M+nub-2*k+2))**0.5)
 def zxjc(k,M,V,W,nua,nub):
@@ -127,3 +146,15 @@ def distrfinder2(V,W,nua,nub): # Just changing the input to the 53 qubits data g
 #         print(k)
 # print(lens)
 
+# equal=True
+# for j in range(10000):
+#     M=ra.randint(1,25)
+#     k=ra.randint(0,M-1)
+#     V=ra.uniform(0.1,10)
+#     W=V*ra.uniform(0.01,1)*(-1)**ra.randint(0,1)
+#     nua=ra.randint(0,1)
+#     nub=ra.randint(0,1)
+#     if np.round(xjc(k,M,V,W,nua,nub)-xjc2(k,M,V,W,nua,nub),5)!=0:
+#         equal=False
+#         break
+# print(equal)
